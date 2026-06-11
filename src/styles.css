@@ -208,7 +208,7 @@ textarea {
   height: 100%;
   max-width: none;
   object-fit: cover;
-  object-position: center right;
+  object-position: top center;
   transform-origin: center;
 }
 
