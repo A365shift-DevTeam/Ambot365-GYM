@@ -28,11 +28,20 @@ export default function HeroSection() {
   const lastOverlayIndex = useRef(-1);
   const [baseSrc, setBaseSrc] = useState(heroFrames[0]);
   const [overlaySrc, setOverlaySrc] = useState(heroFrames[1] ?? heroFrames[0]);
+  const [reducedMotion, setReducedMotion] = useState(false);
   const { scrollYProgress } = useScroll();
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end end"],
   });
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   const frameProgress = useTransform(heroProgress, [0, 1], [0, maxFrameIndex]);
   const overlayOpacity = useTransform(frameProgress, (latest) => latest - Math.floor(latest));
@@ -63,18 +72,24 @@ export default function HeroSection() {
   });
 
   return (
-    <section id="home" className="hero-section hero-scroll-section" ref={heroRef}>
+    <section
+      id="home"
+      className={`hero-section hero-scroll-section${reducedMotion ? " hero-reduced-motion" : ""}`}
+      ref={heroRef}
+    >
       <motion.div className="scroll-progress" style={{ scaleX: scrollYProgress }} />
       <div className="hero-animation-stage">
-        <motion.div className="hero-frame-stack" style={{ scale: heroScale }}>
-          <img className="hero-frame-image hero-frame-base" src={baseSrc} alt="" aria-hidden="true" />
-          <motion.img
-            className="hero-frame-image hero-frame-overlay"
-            src={overlaySrc}
-            alt="Athlete training inside Fitness Factory gym"
-            style={{ opacity: overlayOpacity }}
-          />
-        </motion.div>
+        <div className="hero-frame-viewport">
+          <motion.div className="hero-frame-stack" style={{ scale: reducedMotion ? 1 : heroScale }}>
+            <img className="hero-frame-image hero-frame-base" src={baseSrc} alt="" aria-hidden="true" />
+            <motion.img
+              className="hero-frame-image hero-frame-overlay"
+              src={overlaySrc}
+              alt="Athlete training inside Fitness Factory gym"
+              style={{ opacity: reducedMotion ? 1 : overlayOpacity }}
+            />
+          </motion.div>
+        </div>
       </div>
     </section>
   );
