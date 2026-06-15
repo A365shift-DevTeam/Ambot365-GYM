@@ -4,48 +4,46 @@ import FacilitiesSection from "./components/FacilitiesSection.jsx";
 import Footer from "./components/Footer.jsx";
 import Header from "./components/Header.jsx";
 import HeroSection from "./components/HeroSection.jsx";
-import MembershipCta from "./components/MembershipCta.jsx";
 import OfferSection from "./components/OfferSection.jsx";
 import PricingSection from "./components/PricingSection.jsx";
 import TrainerSection from "./components/TrainerSection.jsx";
-import WhyChooseUs from "./components/WhyChooseUs.jsx";
+import WeightCalculator from "./components/WeightCalculator.jsx";
 
 export default function App() {
-  const [showHeader, setShowHeader] = useState(false);
+  const [headerSolid, setHeaderSolid] = useState(false);
 
   useEffect(() => {
-    const updateHeaderVisibility = () => {
+    const updateHeaderState = () => {
       const hero = document.getElementById("home");
 
       if (!hero) {
-        setShowHeader(true);
+        setHeaderSolid(true);
         return;
       }
 
-      setShowHeader(hero.getBoundingClientRect().bottom <= 0);
+      setHeaderSolid(hero.getBoundingClientRect().bottom <= 80);
     };
 
-    updateHeaderVisibility();
-    window.addEventListener("scroll", updateHeaderVisibility, { passive: true });
-    window.addEventListener("resize", updateHeaderVisibility);
+    updateHeaderState();
+    window.addEventListener("scroll", updateHeaderState, { passive: true });
+    window.addEventListener("resize", updateHeaderState);
 
     return () => {
-      window.removeEventListener("scroll", updateHeaderVisibility);
-      window.removeEventListener("resize", updateHeaderVisibility);
+      window.removeEventListener("scroll", updateHeaderState);
+      window.removeEventListener("resize", updateHeaderState);
     };
   }, []);
 
   return (
     <>
+      <Header className={headerSolid ? "site-header-solid" : "site-header-transparent"} />
       <HeroSection />
-      <Header className={showHeader ? "site-header-visible" : "site-header-hidden"} />
       <main>
         <FacilitiesSection />
-        <WhyChooseUs />
+        <WeightCalculator />
         <PricingSection />
         <OfferSection />
         <TrainerSection />
-        <MembershipCta />
         <ContactSection />
       </main>
       <Footer />
