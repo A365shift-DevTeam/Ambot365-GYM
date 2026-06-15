@@ -231,7 +231,7 @@ textarea {
 }
 
 .hero-scroll-section {
-  min-height: 360vh;
+  min-height: 420vh;
   overflow: visible;
   background: #050505;
 }
@@ -247,6 +247,13 @@ textarea {
   background: #050505;
 }
 
+.hero-frame-stack {
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
+  will-change: transform;
+}
+
 .hero-frame-image {
   position: absolute;
   inset: 0;
@@ -255,7 +262,12 @@ textarea {
   max-width: none;
   object-fit: cover;
   object-position: top center;
-  transform-origin: center;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.hero-frame-overlay {
+  will-change: opacity;
 }
 
 .hero-vignette {
@@ -1670,7 +1682,7 @@ main,
   }
 
   .hero-scroll-section {
-    min-height: 320vh;
+    min-height: 360vh;
   }
 
   .hero-animation-stage {
