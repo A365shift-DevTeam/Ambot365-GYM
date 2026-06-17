@@ -45,7 +45,7 @@ export default function HeroSection() {
 
   const frameProgress = useTransform(heroProgress, [0, 1], [0, maxFrameIndex]);
   const overlayOpacity = useTransform(frameProgress, (latest) => latest - Math.floor(latest));
-  const heroScale = useTransform(heroProgress, [0, 1], [1, 1.08]);
+  const heroScale = useTransform(heroProgress, [0, 1], [1, 1]);
 
   useEffect(() => {
     heroFrames.slice(0, 4).forEach(preloadFrame);
