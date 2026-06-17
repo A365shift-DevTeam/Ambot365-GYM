@@ -316,6 +316,7 @@ textarea {
   max-width: 1200px;
   transform-origin: center center;
   will-change: transform;
+  backface-visibility: hidden;
 }
 
 .hero-frame-image {
@@ -328,10 +329,14 @@ textarea {
   object-position: center top;
   transform: translateZ(0);
   backface-visibility: hidden;
+  will-change: opacity, transform;
+  transition: none !important;
+  pointer-events: none;
 }
 
 .hero-frame-overlay {
-  will-change: opacity;
+  will-change: opacity, transform;
+  transition: none !important;
 }
 
 .hero-vignette {

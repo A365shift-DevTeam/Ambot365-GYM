@@ -14,20 +14,17 @@ const heroFrames = Object.entries(
 const maxFrameIndex = Math.max(heroFrames.length - 1, 0);
 
 function preloadFrame(src) {
-  if (!src) {
-    return;
-  }
-
+  if (!src) return;
   const image = new Image();
   image.src = src;
 }
 
 export default function HeroSection() {
   const heroRef = useRef(null);
+  const baseImgRef = useRef(null);
+  const overlayImgRef = useRef(null);
   const lastBaseIndex = useRef(-1);
   const lastOverlayIndex = useRef(-1);
-  const [baseSrc, setBaseSrc] = useState(heroFrames[0]);
-  const [overlaySrc, setOverlaySrc] = useState(heroFrames[1] ?? heroFrames[0]);
   const [reducedMotion, setReducedMotion] = useState(false);
   const { scrollYProgress } = useScroll();
   const { scrollYProgress: heroProgress } = useScroll({
@@ -47,27 +44,39 @@ export default function HeroSection() {
   const overlayOpacity = useTransform(frameProgress, (latest) => latest - Math.floor(latest));
   const heroScale = useTransform(heroProgress, [0, 1], [1, 1.08]);
 
+  // Preload a generous initial batch for smooth early scrolling
   useEffect(() => {
-    heroFrames.slice(0, 4).forEach(preloadFrame);
+    const initial = Math.min(20, heroFrames.length);
+    heroFrames.slice(0, initial).forEach((src, i) => {
+      setTimeout(() => preloadFrame(src), i * 6);
+    });
   }, []);
 
   useMotionValueEvent(frameProgress, "change", (latest) => {
-    if (heroFrames.length <= 1) {
-      return;
-    }
+    if (heroFrames.length <= 1) return;
 
     const baseIndex = Math.floor(latest);
     const overlayIndex = Math.min(maxFrameIndex, Math.ceil(latest));
 
     if (baseIndex !== lastBaseIndex.current) {
       lastBaseIndex.current = baseIndex;
-      setBaseSrc(heroFrames[baseIndex]);
+      const el = baseImgRef.current;
+      if (el && heroFrames[baseIndex]) {
+        el.src = heroFrames[baseIndex];
+      }
     }
 
     if (overlayIndex !== lastOverlayIndex.current) {
       lastOverlayIndex.current = overlayIndex;
-      setOverlaySrc(heroFrames[overlayIndex]);
-      preloadFrame(heroFrames[Math.min(maxFrameIndex, overlayIndex + 1)]);
+      const el = overlayImgRef.current;
+      if (el && heroFrames[overlayIndex]) {
+        el.src = heroFrames[overlayIndex];
+      }
+      // Progressive preload ahead for buttery scrubbing
+      const aheadEnd = Math.min(maxFrameIndex, overlayIndex + 15);
+      for (let i = overlayIndex + 1; i <= aheadEnd; i++) {
+        preloadFrame(heroFrames[i]);
+      }
     }
   });
 
@@ -81,10 +90,17 @@ export default function HeroSection() {
       <div className="hero-animation-stage">
         <div className="hero-frame-viewport">
           <motion.div className="hero-frame-stack" style={{ scale: reducedMotion ? 1 : heroScale }}>
-            <img className="hero-frame-image hero-frame-base" src={baseSrc} alt="" aria-hidden="true" />
+            <img
+              ref={baseImgRef}
+              className="hero-frame-image hero-frame-base"
+              src={heroFrames[0]}
+              alt=""
+              aria-hidden="true"
+            />
             <motion.img
+              ref={overlayImgRef}
               className="hero-frame-image hero-frame-overlay"
-              src={overlaySrc}
+              src={heroFrames[1] ?? heroFrames[0]}
               alt="Athlete training inside Fitness Factory gym"
               style={{ opacity: reducedMotion ? 1 : overlayOpacity }}
             />
