@@ -37,7 +37,8 @@ export default function App() {
   return (
     <>
       <Header className={headerSolid ? "site-header-solid" : "site-header-transparent"} />
-      <HeroSection />
+      <HeroSection>
+
       <main>
         <FacilitiesSection />
         <WeightCalculator />
@@ -47,6 +48,7 @@ export default function App() {
         <ContactSection />
       </main>
       <Footer />
+      </HeroSection>
     </>
   );
 }
