@@ -13,8 +13,11 @@ const heroFrames = Object.entries(
 
 const maxFrameIndex = Math.max(heroFrames.length - 1, 0);
 
+const preloadedFrames = new Set();
+
 function preloadFrame(src) {
-  if (!src) return;
+  if (!src || preloadedFrames.has(src)) return;
+  preloadedFrames.add(src);
   const image = new Image();
   image.src = src;
 }
@@ -111,9 +114,14 @@ export default function HeroSection({ children }) {
       if (overlayImgRef.current && heroFrames[overlayIndex]) {
         overlayImgRef.current.src = heroFrames[overlayIndex];
       }
-      // Progressive preload ahead for buttery scrubbing
-      const aheadEnd = Math.min(maxFrameIndex, overlayIndex + 30);
+      // Progressive preload ahead and behind for buttery scrubbing in both directions
+      const aheadEnd = Math.min(maxFrameIndex, overlayIndex + 20);
+      const behindEnd = Math.max(0, baseIndex - 20);
+      
       for (let i = overlayIndex + 1; i <= aheadEnd; i++) {
+        preloadFrame(heroFrames[i]);
+      }
+      for (let i = baseIndex - 1; i >= behindEnd; i--) {
         preloadFrame(heroFrames[i]);
       }
     }
