@@ -143,14 +143,14 @@ export default function HeroSection({ children }) {
               <img
                 ref={baseImgRef}
                 className="hero-frame-image hero-frame-base"
-                src={heroFrames[0]}
+                src={heroFrames[Math.max(0, lastBaseIndex.current)]}
                 alt=""
                 aria-hidden="true"
               />
               <img
                 ref={overlayImgRef}
                 className="hero-frame-image hero-frame-overlay"
-                src={heroFrames[1] ?? heroFrames[0]}
+                src={heroFrames[Math.max(1, lastOverlayIndex.current)] ?? heroFrames[0]}
                 alt="Athlete training inside Fitness Factory gym"
                 style={{ opacity: overlayOpacity }}
               />
