@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { brand, navItems } from "../data/siteData.jsx";
+import logoImg from "../assets/fitness logo.png";
 
 export default function Header({ className = "" }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -35,7 +36,7 @@ export default function Header({ className = "" }) {
         transition={{ duration: 0.7 }}
       >
         <a className="logo" href="#home" aria-label="Fitness Factory home" onClick={closeMenu}>
-          <span className="logo-mark">FF</span>
+          <img src={logoImg} alt="Fitness Factory Logo" className="logo-image" style={{ width: '48px', height: 'auto', objectFit: 'contain' }} />
           <span>
             <strong>{brand.name}</strong>
             <small>K.K. Nagar</small>
