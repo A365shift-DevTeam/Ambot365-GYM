@@ -2,17 +2,27 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { brand, navItems } from "../data/siteData.jsx";
+import { useLenis } from "./SmoothScroll.jsx";
 import logoImg from "../assets/fitness logo.png";
 
 export default function Header({ className = "" }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const lenis = useLenis();
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+      lenis?.stop();
+    } else {
+      document.body.style.overflow = "";
+      lenis?.start();
+    }
+
     return () => {
       document.body.style.overflow = "";
+      lenis?.start();
     };
-  }, [menuOpen]);
+  }, [menuOpen, lenis]);
 
   useEffect(() => {
     const closeOnResize = () => {

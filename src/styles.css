@@ -32,7 +32,11 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+}
+
+[id] {
+  scroll-margin-top: 88px;
 }
 
 body {

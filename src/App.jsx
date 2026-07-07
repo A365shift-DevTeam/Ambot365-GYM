@@ -8,9 +8,11 @@ import OfferSection from "./components/OfferSection.jsx";
 import PricingSection from "./components/PricingSection.jsx";
 import TrainerSection from "./components/TrainerSection.jsx";
 import WeightCalculator from "./components/WeightCalculator.jsx";
+import { useLenis } from "./components/SmoothScroll.jsx";
 
 export default function App() {
   const [headerSolid, setHeaderSolid] = useState(false);
+  const lenis = useLenis();
 
   useEffect(() => {
     const updateHeaderState = () => {
@@ -25,14 +27,23 @@ export default function App() {
     };
 
     updateHeaderState();
-    window.addEventListener("scroll", updateHeaderState, { passive: true });
     window.addEventListener("resize", updateHeaderState);
+
+    if (lenis) {
+      lenis.on("scroll", updateHeaderState);
+      return () => {
+        lenis.off("scroll", updateHeaderState);
+        window.removeEventListener("resize", updateHeaderState);
+      };
+    }
+
+    window.addEventListener("scroll", updateHeaderState, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", updateHeaderState);
       window.removeEventListener("resize", updateHeaderState);
     };
-  }, []);
+  }, [lenis]);
 
   return (
     <>
