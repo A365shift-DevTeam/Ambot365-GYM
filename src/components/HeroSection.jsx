@@ -1,26 +1,6 @@
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-
-const heroFrames = Object.entries(
-  import.meta.glob("../../frames/*.jpg", {
-    eager: true,
-    query: "?url",
-    import: "default",
-  }),
-)
-  .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
-  .map(([, src]) => src);
-
-const maxFrameIndex = Math.max(heroFrames.length - 1, 0);
-
-const preloadedFrames = new Set();
-
-function preloadFrame(src) {
-  if (!src || preloadedFrames.has(src)) return;
-  preloadedFrames.add(src);
-  const image = new Image();
-  image.src = src;
-}
+import { heroFrames, maxFrameIndex, preloadFrame } from "../utils/heroFrames";
 
 export default function HeroSection({ children }) {
   const trackRef = useRef(null);

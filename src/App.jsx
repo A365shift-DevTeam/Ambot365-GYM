@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ContactSection from "./components/ContactSection.jsx";
 import FacilitiesSection from "./components/FacilitiesSection.jsx";
 import Footer from "./components/Footer.jsx";
+import FrameLoader from "./components/FrameLoader.jsx";
 import Header from "./components/Header.jsx";
 import HeroSection from "./components/HeroSection.jsx";
 import OfferSection from "./components/OfferSection.jsx";
@@ -11,6 +12,7 @@ import WeightCalculator from "./components/WeightCalculator.jsx";
 import { useLenis } from "./components/SmoothScroll.jsx";
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
   const [headerSolid, setHeaderSolid] = useState(false);
   const lenis = useLenis();
 
@@ -47,6 +49,7 @@ export default function App() {
 
   return (
     <>
+      {isLoading && <FrameLoader onComplete={() => setIsLoading(false)} />}
       <Header className={headerSolid ? "site-header-solid" : "site-header-transparent"} />
       <HeroSection>
 
