@@ -1,19 +1,25 @@
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { heroFrames, maxFrameIndex, preloadFrame } from "../utils/heroFrames";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  getClosestLoadedImage,
+  getLoadedImage,
+  heroFrames,
+  maxFrameIndex,
+  preloadFrame,
+} from "../utils/heroFrames";
 
 export default function HeroSection({ children }) {
   const trackRef = useRef(null);
   const stickyRef = useRef(null);
-  const baseImgRef = useRef(null);
-  const overlayImgRef = useRef(null);
-  const lastBaseIndex = useRef(-1);
-  const lastOverlayIndex = useRef(-1);
+  const canvasRef = useRef(null);
+  const stackRef = useRef(null);
+  const animFrameId = useRef(null);
+  const currentFrameProgress = useRef(0);
 
   const [reducedMotion, setReducedMotion] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileScrollDistance, setMobileScrollDistance] = useState(0);
-  
+
   const { scrollY, scrollYProgress } = useScroll();
 
   useEffect(() => {
@@ -26,7 +32,7 @@ export default function HeroSection({ children }) {
     const updateMobile = () => setIsMobile(mobileMedia.matches);
     updateMobile();
     mobileMedia.addEventListener("change", updateMobile);
-    
+
     const updateDist = () => setMobileScrollDistance(window.innerHeight * 4);
     updateDist();
     window.addEventListener("resize", updateDist);
@@ -38,80 +44,140 @@ export default function HeroSection({ children }) {
     };
   }, []);
 
-  const [heroScale, setHeroScale] = useState(1);
-  const [overlayOpacity, setOverlayOpacity] = useState(0);
-
-  // Preload a generous initial batch for smooth early scrolling
+  // Preload initial batch for instant scrub readiness
   useEffect(() => {
-    const initial = Math.min(30, heroFrames.length);
+    const initial = Math.min(40, heroFrames.length);
     heroFrames.slice(0, initial).forEach((src, i) => {
-      setTimeout(() => preloadFrame(src), i * 6);
+      setTimeout(() => preloadFrame(src), i * 4);
     });
   }, []);
+
+  const drawFrame = useCallback((frameProgress) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const width = Math.round(rect.width * dpr);
+    const height = Math.round(rect.height * dpr);
+
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    const latest = Math.min(maxFrameIndex, Math.max(0, frameProgress * maxFrameIndex));
+    const baseIndex = Math.floor(latest);
+    const overlayIndex = Math.min(maxFrameIndex, Math.ceil(latest));
+    const alpha = latest - baseIndex;
+
+    const baseImg = getLoadedImage(heroFrames[baseIndex]) || getClosestLoadedImage(baseIndex);
+    const overlayImg = alpha > 0.01 ? (getLoadedImage(heroFrames[overlayIndex]) || getClosestLoadedImage(overlayIndex)) : null;
+
+    ctx.fillStyle = "#050505";
+    ctx.fillRect(0, 0, width, height);
+
+    const renderCover = (img, opacity = 1) => {
+      if (!img || !img.naturalWidth) return;
+      const imgW = img.naturalWidth;
+      const imgH = img.naturalHeight;
+      const imgRatio = imgW / imgH;
+      const canvasRatio = width / height;
+
+      let rW, rH, x, y;
+      if (canvasRatio > imgRatio) {
+        rW = width;
+        rH = width / imgRatio;
+        x = 0;
+        y = (height - rH) / 2;
+      } else {
+        rW = height * imgRatio;
+        rH = height;
+        x = (width - rW) / 2;
+        y = 0;
+      }
+
+      if (opacity < 1) {
+        ctx.globalAlpha = opacity;
+      }
+      ctx.drawImage(img, x, y, rW, rH);
+      if (opacity < 1) {
+        ctx.globalAlpha = 1;
+      }
+    };
+
+    if (baseImg) {
+      renderCover(baseImg, 1);
+    }
+    if (overlayImg && overlayImg !== baseImg && alpha > 0.01) {
+      renderCover(overlayImg, alpha);
+    }
+
+    // Preload buffer ahead and behind for uninterrupted scrubbing
+    const ahead = Math.min(maxFrameIndex, baseIndex + 25);
+    const behind = Math.max(0, baseIndex - 20);
+    for (let i = baseIndex + 1; i <= ahead; i++) {
+      preloadFrame(heroFrames[i]);
+    }
+    for (let i = baseIndex - 1; i >= behind; i--) {
+      preloadFrame(heroFrames[i]);
+    }
+  }, []);
+
+  const renderLoop = useCallback(() => {
+    drawFrame(currentFrameProgress.current);
+
+    if (stackRef.current) {
+      const scale = reducedMotion ? 1 : 1 + currentFrameProgress.current * 0.08;
+      stackRef.current.style.transform = `scale(${scale})`;
+    }
+  }, [drawFrame, reducedMotion]);
 
   useMotionValueEvent(scrollY, "change", (y) => {
     if (heroFrames.length <= 1) return;
 
-    let latest = 0;
+    let progress = 0;
 
     if (trackRef.current && stickyRef.current) {
       if (isMobile) {
-        // Bulletproof mobile logic: Ensure JS and CSS are 100% in sync
         const maxScroll = mobileScrollDistance || window.innerHeight * 4;
-        const progress = Math.min(Math.max(y / maxScroll, 0), 1);
-        latest = progress * maxFrameIndex;
-        setHeroScale(1 + progress * 0.08);
+        progress = Math.min(Math.max(y / maxScroll, 0), 1);
       } else {
-        // Desktop logic using rects
         const rect = trackRef.current.getBoundingClientRect();
         const scrolled = -rect.top;
         const stickyHeight = stickyRef.current.offsetHeight;
         const stickyOffsetTop = stickyRef.current.offsetTop;
-        
         const scrollDistance = Math.max(rect.height - stickyHeight - stickyOffsetTop, 1);
-        const progress = Math.min(Math.max(scrolled / scrollDistance, 0), 1);
-        latest = progress * maxFrameIndex;
-        setHeroScale(1 + progress * 0.08);
+        progress = Math.min(Math.max(scrolled / scrollDistance, 0), 1);
       }
     }
 
-    if (reducedMotion) {
-      setHeroScale(1);
-    }
+    currentFrameProgress.current = progress;
 
-    const baseIndex = Math.floor(latest);
-    const overlayIndex = Math.min(maxFrameIndex, Math.ceil(latest));
-
-    if (baseIndex !== lastBaseIndex.current) {
-      lastBaseIndex.current = baseIndex;
-      if (baseImgRef.current && heroFrames[baseIndex]) {
-        baseImgRef.current.src = heroFrames[baseIndex];
-      }
-    }
-
-    if (overlayIndex !== lastOverlayIndex.current) {
-      lastOverlayIndex.current = overlayIndex;
-      if (overlayImgRef.current && heroFrames[overlayIndex]) {
-        overlayImgRef.current.src = heroFrames[overlayIndex];
-      }
-      // Progressive preload ahead and behind for buttery scrubbing in both directions
-      const aheadEnd = Math.min(maxFrameIndex, overlayIndex + 20);
-      const behindEnd = Math.max(0, baseIndex - 20);
-      
-      for (let i = overlayIndex + 1; i <= aheadEnd; i++) {
-        preloadFrame(heroFrames[i]);
-      }
-      for (let i = baseIndex - 1; i >= behindEnd; i--) {
-        preloadFrame(heroFrames[i]);
-      }
-    }
-
-    if (!reducedMotion) {
-      setOverlayOpacity(latest - baseIndex);
-    } else {
-      setOverlayOpacity(1);
+    if (!animFrameId.current) {
+      animFrameId.current = requestAnimationFrame(() => {
+        animFrameId.current = null;
+        renderLoop();
+      });
     }
   });
+
+  useEffect(() => {
+    renderLoop();
+    const handleResize = () => renderLoop();
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (animFrameId.current) {
+        cancelAnimationFrame(animFrameId.current);
+      }
+    };
+  }, [renderLoop]);
 
   return (
     <section className={`hero-section${reducedMotion ? " hero-reduced-motion" : ""}`}>
@@ -119,26 +185,17 @@ export default function HeroSection({ children }) {
       <div id="home" className="hero-scroll-track" ref={trackRef}>
         <div className="hero-sticky-wrapper" ref={stickyRef}>
           <div className="hero-canvas-wrapper">
-            <motion.div className="hero-frame-stack" style={{ scale: heroScale }}>
-              <img
-                ref={baseImgRef}
-                className="hero-frame-image hero-frame-base"
-                src={heroFrames[Math.max(0, lastBaseIndex.current)]}
-                alt=""
-                aria-hidden="true"
+            <div className="hero-frame-stack" ref={stackRef}>
+              <canvas
+                ref={canvasRef}
+                className="hero-frame-image"
+                aria-label="Athlete training inside Ambot365 Gym"
+                role="img"
               />
-              <img
-                ref={overlayImgRef}
-                className="hero-frame-image hero-frame-overlay"
-                src={heroFrames[Math.max(1, lastOverlayIndex.current)] ?? heroFrames[0]}
-                alt="Athlete training inside Ambot365 Gym"
-                style={{ opacity: overlayOpacity }}
-              />
-            </motion.div>
+            </div>
           </div>
           {isMobile && <div className="hero-next-section">{children}</div>}
         </div>
-        {/* Spacer to create the scroll track height within the content box so position: sticky can slide */}
         {isMobile && mobileScrollDistance > 0 && (
           <div style={{ height: `${mobileScrollDistance}px` }} />
         )}
