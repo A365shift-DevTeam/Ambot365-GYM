@@ -9,7 +9,7 @@ export default function ContactSection() {
       <div className="container contact-grid">
         <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
           <p className="section-kicker">Contact</p>
-          <h2>Visit Fitness Factory</h2>
+          <h2>Visit Ambot365 Gym</h2>
           <p className="section-lead">{brand.address}</p>
           <div className="contact-lines">
             <p>

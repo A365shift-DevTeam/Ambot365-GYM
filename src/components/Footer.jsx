@@ -21,7 +21,7 @@ export default function Footer() {
       <div className="container footer-grid">
         <div>
           <a className="logo footer-logo" href="#home">
-            <span className="logo-mark">FF</span>
+            <span className="logo-mark">AG</span>
             <span>
               <strong>{brand.fullName}</strong>
               <small>{brand.tagline}</small>
@@ -43,7 +43,7 @@ export default function Footer() {
         <FooterColumn title="Quick Links" items={navItems} />
         <FooterColumn title="Membership Plans" items={pricing.map((item) => item.title)} />
       </div>
-      <div className="container copyright">© 2026 Fitness Factory K.K. Nagar. All rights reserved.</div>
+      <div className="container copyright">© 2026 {brand.fullName}. All rights reserved.</div>
     </footer>
   );
 }

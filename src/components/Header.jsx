@@ -45,11 +45,10 @@ export default function Header({ className = "" }) {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7 }}
       >
-        <a className="logo" href="#home" aria-label="Fitness Factory home" onClick={closeMenu}>
-          <img src={logoImg} alt="Fitness Factory Logo" className="logo-image" style={{ width: '48px', height: 'auto', objectFit: 'contain' }} />
+        <a className="logo" href="#home" aria-label={`${brand.name} home`} onClick={closeMenu}>
+          <img src={logoImg} alt={`${brand.name} Logo`} className="logo-image" style={{ width: '48px', height: 'auto', objectFit: 'contain' }} />
           <span>
             <strong>{brand.name}</strong>
-            <small>K.K. Nagar</small>
           </span>
         </a>
         <nav className="desktop-nav" aria-label="Primary navigation">

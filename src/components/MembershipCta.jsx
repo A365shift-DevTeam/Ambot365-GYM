@@ -8,7 +8,7 @@ export default function MembershipCta() {
           <p className="section-kicker">Enroll Now</p>
           <h2>Start Your Fitness Journey Today!</h2>
           <p>
-            Join Fitness Factory K.K. Nagar and transform your body with expert training, premium equipment, and
+            Join Ambot365 Gym and transform your body with expert training, premium equipment, and
             personalized fitness plans.
           </p>
         </div>

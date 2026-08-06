@@ -73,7 +73,7 @@ export default function FrameLoader({ onComplete }) {
           />
           <div className="frame-loader-vignette" aria-hidden="true" />
           <div className="frame-loader-content">
-            <img className="frame-loader-logo" src={logoImg} alt="Fitness Factory" />
+            <img className="frame-loader-logo" src={logoImg} alt="Ambot365 Gym" />
             <p className="frame-loader-label">Loading...</p>
             <div className="frame-loader-track" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100}>
               <motion.div

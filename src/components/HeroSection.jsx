@@ -131,7 +131,7 @@ export default function HeroSection({ children }) {
                 ref={overlayImgRef}
                 className="hero-frame-image hero-frame-overlay"
                 src={heroFrames[Math.max(1, lastOverlayIndex.current)] ?? heroFrames[0]}
-                alt="Athlete training inside Fitness Factory gym"
+                alt="Athlete training inside Ambot365 Gym"
                 style={{ opacity: overlayOpacity }}
               />
             </motion.div>

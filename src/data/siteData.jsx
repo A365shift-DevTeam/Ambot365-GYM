@@ -15,8 +15,8 @@ import {
 } from "lucide-react";
 
 export const brand = {
-  name: "Fitness Factory",
-  fullName: "Fitness Factory K.K. Nagar",
+  name: "Ambot365 Gym",
+  fullName: "Ambot365 Gym",
   tagline: "Fitness to Enjoy",
   address:
     "No. 893, 1st and 2nd Floor, Munusamy Salai, Near Pondicherry Guest House, K.K. Nagar West, K.K. Nagar, Chennai, India 600078",
