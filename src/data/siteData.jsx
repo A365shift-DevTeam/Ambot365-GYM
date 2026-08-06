@@ -18,9 +18,9 @@ export const brand = {
   name: "Ambot365 Gym",
   fullName: "Ambot365 Gym",
   tagline: "Fitness to Enjoy",
-  address:
-    "No. 893, 1st and 2nd Floor, Munusamy Salai, Near Pondicherry Guest House, K.K. Nagar West, K.K. Nagar, Chennai, India 600078",
-  phones: ["+91 44 4768 8184", "+91 9981 9981 83"],
+  address: "123 Health & Fitness Boulevard, Suite 100, Central City, 12345",
+  location: "Central City",
+  phones: ["+1 (555) 123-4567", "+1 (555) 987-6543"],
 };
 
 export const navItems = ["Home", "Facilities", "Programs", "Pricing", "Contact"];
@@ -105,7 +105,7 @@ export const facilities = [
 ];
 
 export const whyChoose = [
-  "Chennai's largest international fitness center",
+  "Premier international fitness center",
   "World's top-rated premium equipment",
   "Certified trainers",
   "Functional training and CrossFit",

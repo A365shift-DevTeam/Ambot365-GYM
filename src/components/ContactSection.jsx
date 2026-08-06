@@ -16,7 +16,7 @@ export default function ContactSection() {
               <Phone size={18} /> {brand.phones.join(" / ")}
             </p>
             <p>
-              <MapPin size={18} /> K.K. Nagar, Chennai
+              <MapPin size={18} /> {brand.location}
             </p>
             <p>
               <Mail size={18} /> Start your fitness journey with us today.
