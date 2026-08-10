@@ -6,6 +6,8 @@ import {
   heroFrames,
   maxFrameIndex,
   preloadFrame,
+  resolveVariant,
+  setFrameVariant,
 } from "../utils/heroFrames";
 
 export default function HeroSection({ children }) {
@@ -44,14 +46,6 @@ export default function HeroSection({ children }) {
     };
   }, []);
 
-  // Preload initial batch for instant scrub readiness
-  useEffect(() => {
-    const initial = Math.min(40, heroFrames.length);
-    heroFrames.slice(0, initial).forEach((src, i) => {
-      setTimeout(() => preloadFrame(src), i * 4);
-    });
-  }, []);
-
   const drawFrame = useCallback((frameProgress) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -82,6 +76,31 @@ export default function HeroSection({ children }) {
     ctx.fillStyle = "#050505";
     ctx.fillRect(0, 0, width, height);
 
+    // Match CSS object-position: keep head/hands (top of frame) visible.
+    // posX/posY are 0–1 like object-position percentages (0.5 = center, 0 = top/left).
+    let posX = 0.5;
+    let posY = 0; // desktop default: center top
+    if (typeof window !== "undefined") {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (w <= 680) {
+        posX = 0.5;
+        posY = 0.14;
+      } else if (w <= 820) {
+        posX = 0.52;
+        posY = 0.1;
+      } else if (w <= 1050) {
+        posX = 0.5;
+        posY = 0.08;
+      } else if (w >= 1440) {
+        posX = 0.5;
+        posY = 0.12;
+      }
+      if (h <= 520 && w > h) {
+        posY = 0.2;
+      }
+    }
+
     const renderCover = (img, opacity = 1) => {
       if (!img || !img.naturalWidth) return;
       const imgW = img.naturalWidth;
@@ -89,17 +108,24 @@ export default function HeroSection({ children }) {
       const imgRatio = imgW / imgH;
       const canvasRatio = width / height;
 
-      let rW, rH, x, y;
+      let rW;
+      let rH;
+      let x;
+      let y;
+
+      // object-fit: cover + object-position
       if (canvasRatio > imgRatio) {
+        // Canvas is wider → fill width, crop top/bottom
         rW = width;
         rH = width / imgRatio;
         x = 0;
-        y = (height - rH) / 2;
+        y = (height - rH) * posY;
       } else {
-        rW = height * imgRatio;
+        // Canvas is taller → fill height, crop sides
         rH = height;
-        x = (width - rW) / 2;
+        rW = height * imgRatio;
         y = 0;
+        x = (width - rW) * posX;
       }
 
       if (opacity < 1) {
@@ -137,6 +163,16 @@ export default function HeroSection({ children }) {
       stackRef.current.style.transform = `scale(${scale})`;
     }
   }, [drawFrame, reducedMotion]);
+
+  // Keep desktop/mobile frame sets in sync with viewport
+  useEffect(() => {
+    setFrameVariant(resolveVariant(isMobile));
+    const initial = Math.min(40, heroFrames.length);
+    heroFrames.slice(0, initial).forEach((src, i) => {
+      setTimeout(() => preloadFrame(src), i * 4);
+    });
+    renderLoop();
+  }, [isMobile, renderLoop]);
 
   useMotionValueEvent(scrollY, "change", (y) => {
     if (heroFrames.length <= 1) return;

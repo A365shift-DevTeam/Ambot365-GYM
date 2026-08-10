@@ -1,0 +1,5 @@
+# HTTP headers for Netlify & Cloudflare Pages
+
+/frames/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *

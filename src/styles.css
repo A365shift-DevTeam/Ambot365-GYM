@@ -380,7 +380,8 @@ textarea {
   inset: 0;
   width: 100%;
   height: 100%;
-  transform-origin: center center;
+  /* Scale from the top so head/hands stay in frame while scrolling */
+  transform-origin: center top;
   will-change: transform;
 }
 
@@ -390,6 +391,7 @@ textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Head + raised hands live at the top of the source frames */
   object-position: center top;
   will-change: opacity, transform;
   pointer-events: none;
@@ -410,6 +412,8 @@ textarea {
     top: 0;
     height: 100dvh;
     width: 100%;
+    /* Allow scaled frames to extend slightly; still clip sides via canvas */
+    overflow: hidden;
   }
   .hero-canvas-wrapper {
     height: 100dvh;
