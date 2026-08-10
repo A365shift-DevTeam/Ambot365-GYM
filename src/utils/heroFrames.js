@@ -1,5 +1,5 @@
 export const heroFrames = Object.entries(
-  import.meta.glob("../../frames/*.jpg", {
+  import.meta.glob("../../frames/*.webp", {
     eager: true,
     query: "?url",
     import: "default",
