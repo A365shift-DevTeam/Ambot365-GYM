@@ -7,6 +7,13 @@ export const maxFrameIndex = Math.max(FRAME_COUNT - 1, 0);
 
 const MOBILE_MQ = "(max-width: 991px)";
 
+// Frames uploaded by scripts/upload-frames-cloudinary.mjs. Delivered untransformed:
+// they are already optimized, and f_auto/q_auto re-encodes came out ~60% larger.
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const USE_CLOUDINARY =
+  Boolean(CLOUDINARY_CLOUD_NAME) && String(import.meta.env.VITE_USE_CLOUDINARY).trim() === "true";
+const CLOUDINARY_BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/fitness-factory/frames`;
+
 /** @type {"desktop" | "mobile"} */
 let activeVariant = "desktop";
 
@@ -19,6 +26,7 @@ export function padFrameIndex(index) {
 
 export function frameUrl(index, variant = activeVariant) {
   if (index < 0 || index >= FRAME_COUNT) return null;
+  if (USE_CLOUDINARY) return `${CLOUDINARY_BASE}/${variant}/${padFrameIndex(index)}.${EXT}`;
   return `/frames/${variant}/${padFrameIndex(index)}.${EXT}`;
 }
 

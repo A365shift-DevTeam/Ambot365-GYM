@@ -120,6 +120,16 @@ function formatBytes(bytes) {
 
 async function main() {
   const { force } = parseArgs(process.argv.slice(2));
+
+  // Frames are served from Cloudinary; the local masters are optional.
+  // Without them, keep the existing src/utils/frameManifest.json and skip.
+  try {
+    await fs.access(SRC_DIR);
+  } catch {
+    console.log("No local frames/ folder. Skipping optimization (frames are served from Cloudinary).");
+    return;
+  }
+
   const sources = await listSourceFrames();
 
   if (sources.length === 0) {

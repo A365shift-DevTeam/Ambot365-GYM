@@ -172,6 +172,8 @@ export default function HeroSection({ children }) {
       setTimeout(() => preloadFrame(src), i * 4);
     });
     renderLoop();
+    // First paint can run before any frame is cached; redraw once frame 1 arrives.
+    preloadFrame(heroFrames[0]).then(() => renderLoop());
   }, [isMobile, renderLoop]);
 
   useMotionValueEvent(scrollY, "change", (y) => {

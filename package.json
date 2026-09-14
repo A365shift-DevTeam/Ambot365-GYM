@@ -8,6 +8,8 @@
     "predev": "node scripts/optimize-frames.mjs",
     "optimize:frames": "node scripts/optimize-frames.mjs",
     "optimize:frames:force": "node scripts/optimize-frames.mjs --force",
+    "upload:frames": "node scripts/upload-frames-cloudinary.mjs",
+    "upload:frames:force": "node scripts/upload-frames-cloudinary.mjs --force",
     "prebuild": "node scripts/optimize-frames.mjs",
     "build": "vite build",
     "preview": "vite preview"
@@ -22,6 +24,7 @@
     "vite": "latest"
   },
   "devDependencies": {
+    "cloudinary": "^2.11.0",
     "sharp": "^0.35.3"
   }
 }
